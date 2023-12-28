@@ -2,12 +2,16 @@ import pandas as pd
 import numpy as np
 import quandl
 import math
+import datetime
 from sklearn import preprocessing, model_selection, svm
 from sklearn.linear_model import LinearRegression
+import matplotlib.pyplot as plt
+from matplotlib import style
 #Preprocessing can be used to scale the data for calculation
 #model_selection can used to suffle and seperate the data // Earlier used cross-validatio which was decrypted
 #svm for regression 
 
+style.use('ggplot')
 
 df=quandl.get('WIKI/TSLA')
 
@@ -44,3 +48,23 @@ accuracy=clf.score(X_test,y_test) #Score associated with test
 
 forcast_set=clf.predict(X_lately,)
 print(forcast_set,accuracy,forcast_out)
+df['Forcast']=np.nan #This specifies that entire column if full of not a number data
+
+last_date=df.iloc[-1].name
+last_unix=last_date.timestamp()
+one_day=86400 #Second
+next_unix=last_unix+one_day
+
+for i in forcast_set:
+    next_date=datetime.datetime.fromtimestamp(next_unix)
+    next_unix+=one_day
+    df.loc[next_date]=[np.nan for _ in range(len(df.columns)-1)]+[i]
+
+print(df.head())
+
+df['Adj. Close'].plot()
+df['Forcast'].plot()
+plt.legend(loc=4) 
+plt.xlabel('Date')
+plt.ylabel('Price')
+plt.show()
